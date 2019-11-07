@@ -30,7 +30,7 @@ server.listen(3030);
 
 
 //设置被监听文件
-var filename = './input.txt';
+var filename = '/usr/local/webserver/nginx/logs/access.log';
 var logsArr = new Array();
 let num = 0;
 function monitor(sk){
