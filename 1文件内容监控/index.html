@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>升级详情</title>
     <style>
         ul,
         li {
@@ -11,7 +11,6 @@
             padding: 0;
             margin: 0
         }
-
         body {
             margin: 0;
             background: #161616 url(pattern_40.gif) top left repeat;
@@ -20,7 +19,6 @@
             height: 100%;
             color: #fff;
         }
-
         .title {
             background: #ccc;
             width: 80%;
@@ -29,7 +27,6 @@
             height: 3vh;
             overflow: auto;
         }
-
         .bg {
             background: #000;
             color: #fff;
@@ -39,7 +36,6 @@
             height: 90vh;
             overflow: auto;
         }
-
         .progress {
             text-align: right;
             background: #000;
@@ -54,7 +50,6 @@
             line-height: 1.5rem;
             border: 1px solid #ccc;
         }
-
         .content {
             height: 1.3rem;
             margin: 2px 0;
@@ -62,7 +57,6 @@
             position: absolute;
             box-shadow: 0px 0px 10px 1px rgba(0, 198, 255, 0.4);
         }
-
         .active {
             visibility: visible;
         }
@@ -73,7 +67,6 @@
     <div class="title"></div>
     <div class="bg">
         <ul id="receive">
-
         </ul>
     </div>
     <div class="progress">
@@ -84,7 +77,7 @@
     <!-- /socket.io/socket.io.js 这个引用路径是固定的，socket.io会自动帮我们解析 -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var socket = io.connect('http://111.231.120.194:3030');
+        var socket = io.connect('ws://127.0.0.1:3030');
         //连接成功时触发
         socket.on('connect', function () {
             console.log('连接成功');
@@ -114,6 +107,7 @@
             console.log(val)
             progress(val)
         });
+        socket.emit('send',"asdgsadg")
         //进度条
         let progress = function (i) {
             var content = document.getElementsByClassName('content');

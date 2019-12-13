@@ -9,7 +9,7 @@
         "env_production": {
           "NODE_ENV": "production"
         },
-        "instances": 4,
+        "instances": 1,
         "exec_mode": "cluster",
         "max_restarts" : 3,
         "restart_delay" : 5000,
