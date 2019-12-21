@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>升级详情</title>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        ul,
+        li {
+            list-style: none;
+        }
+
+        body {
+            margin: 0;
+            background: #161616;
+            padding: 0;
+            font: 12px normal Verdana, Arial, Helvetica, sans-serif;
+            height: 100%;
+            color: #fff;
+        }
+
+        video {
+            position: fixed;
+            right: 0px;
+            bottom: 0px;
+            min-width: 100%;
+            min-height: 100%;
+            width: 100%;
+            /* width: auto; */
+            /*加滤镜*/
+            /*filter: blur(15px); //背景模糊设置 */
+            /*-webkit-filter: grayscale(100%);*/
+            /*filter:grayscale(100%); //背景灰度设置*/
+            z-index: -11
+        }
+
+        source {
+            min-width: 100%;
+            min-height: 100%;
+            height: auto;
+            width: auto;
+        }
+
+        .title {
+            background: #ccc;
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 0 auto;
+            height: 3vh;
+            overflow: auto;
+        }
+
+        .bg {
+            color: #fff;
+            width: 90%;
+            margin: 0 auto;
+            margin-top: 0 auto;
+            height: 90vh;
+            overflow: auto;
+        }
+        .textInfo{
+            font-size:1rem;
+            width: 90%;
+            margin: 0 auto;
+            margin-bottom:1vh;
+
+        }
+        .progress {
+            text-align: right;
+            background: rgba(255,255,255,0.1);
+            height: 1.5rem;
+            border-radius: 0.75rem;
+            /* border-left: 1px solid #111;
+            border-top: 1px solid #111;
+            border-right: 1px solid #333;
+            border-bottom: 1px solid #333; */
+            width: 90%;
+            margin: 0 auto;
+            line-height: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+       
+        .content {
+            border-radius: 0.65rem;;
+            height: 1.3rem;
+            margin: 2px 0;
+            background: #fff;
+            position: absolute;
+            box-shadow: 0px 0px 10px 1px rgba(0, 198, 255, 0.4);
+        }
+
+        .active {
+            visibility: visible;
+        }
+
+        ::-webkit-scrollbar-track-piece { 
+background-color:#f8f8f8;
+}
+::-webkit-scrollbar {
+width:0px;
+height:0px;
+}
+::-webkit-scrollbar-thumb {
+background-color:#dddddd;
+background-clip:padding-box;
+min-height:28px;
+}
+::-webkit-scrollbar-thumb:hover {
+background-color:#bbb;
+}
+    </style>
+</head>
+
+<body>
+    <div>
+        <video id="v1" autoplay loop muted>
+            <source src="./bg.mp4" type="video/mp4" />
+        </video>
+        <div class="bg">
+            <ul id="receive">
+            </ul>
+        </div>
+        <div class="textInfo">
+                <span class="contentText">已完成0%</span>
+
+            <span  style="float:right">正在升级中，请稍后...</span>
+        </div>
+        <div class="progress">
+            <div class="content">
+            </div>
+        </div>
+        <script src="./socket.js"></script>
+        <script>
+            let nowurl = window.location.hostname
+            /*=============================页面元素==============================*/
+            //进度条
+            let progress = function (i) {
+                boxInsert(i)
+                var content = document.getElementsByClassName('content');
+                content = content[0];
+                var contentText = document.getElementsByClassName('contentText');
+                contentText = contentText[0];
+                if (i < 1000) {
+                    content.style.width = (i * 0.9) + '%';
+                    contentText.innerHTML ='已完成'+parseInt(i) + '%';
+                } else {
+                    contentText.innerHTML = '升级完成';
+                    content.style.width = '90%';
+                    setTimeout(() => {
+                        console.log('页面跳转')
+                        location.replace('https://' + nowurl + '/#/login')
+                    }, 1000)
+                }
+            }
+            let progerssDetail={
+                '1':'正在解压升级包',
+                '20':'正在检查升级文件',
+                '40':'升级文件检查完毕',
+                '60':'正在卸载旧平台',
+                '70':'旧平台卸载完成',
+                '80':'正在安装新平台',
+                '99':'新平台安装完成',
+                '100':'新平台正在启动中...',
+            }
+            //详细信息窗口
+            let boxInsert = function (data) {
+                //插入数据
+                let bg = document.getElementsByClassName('bg')[0];
+                var node = document.createElement("li");
+                if(progerssDetail[data]){
+                    node.innerHTML = progerssDetail[data];
+                }
+                document.querySelector("#receive").appendChild(node);
+                //滚动条至最下方
+                bg.scrollTop = bg.scrollHeight;
+            }
+            /*=============================版本升级相关=======================*/
+            var isUp = null;
+            let upToNum = function (i, num) {
+                progress(i)
+                if (i < num) {
+                      i++
+                      isUp = setTimeout(() => {
+                        upToNum(i, num)
+                    },100)
+                }
+            }
+            let b = function () {
+                let i = 0;
+                var socket = io.connect('ws://127.0.0.1:23030',{path: '/update'});
+                //连接成功时触发
+                socket.on('connect', function () {
+                    console.log('连接成功');
+                });
+                //连接断开时触发
+                socket.on('disconnect', function () {
+                    console.log('连接断开');
+                });
+                //收到消息时触发
+                // socket.on('message', function (data) {
+                //     if (data != "") {
+                //         boxInsert(data)
+                //     }
+                // });
+                //socket返回进度条
+                socket.on('progress', function (val) {
+                    if (val > i) {
+                        console.log(isUp)
+                        window.clearTimeout(isUp)
+                        isUp = null;
+                        setTimeout(() => {
+                            upToNum(i, val)      
+                            //  isUp = true;
+                            i = val
+                        }, 100)
+                    }
+                });
+            }
+            /*=============================a升级相关=======================*/
+            let a = function () {
+                let i = 0
+                let upTo99 = function () {
+                    i++
+                    console.log(i)
+                    progress(i)
+                    if (i < 99) {
+                        setTimeout(() => {
+                            upTo99()
+                        }, 1000)
+                    }
+                }
+                upTo99()
+                //验证a升级是否完成
+                function send() {
+                    let xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open("GET",
+                        "https://" + nowurl + "/login/", true);
+                    xmlHttp.send(null);
+                    xmlHttp.onreadystatechange = function () {
+                        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                            i = 100;
+                            progress(100)
+                            console.log(xmlHttp.responseText)
+                        }
+                    }
+                }
+                //每4秒验证b升级是否完成
+                setInterval(() => {
+                    console.log("send")
+                    send()
+                }, 4000)
+            }
+            /*============================初始化============================*/
+            //发送ajax判断升级类型
+            function init() {
+                xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("GET",
+                    "http://127.0.0.1:23030/getType",
+                    true);
+                xmlHttp.send(null);
+                xmlHttp.onreadystatechange = function () {
+                    if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                        console.log(JSON.parse(xmlHttp.responseText).type)
+                        if (JSON.parse(xmlHttp.responseText).type == "a") {
+                            console.log("正在a升级,不需要后端")
+                            a()
+                        }
+                        if (JSON.parse(xmlHttp.responseText).type == "b") {
+                            console.log("正在进行b升级，需要后端返回数据")
+                            b()
+                        }
+                    }
+                }
+            }
+            init()
+        </script>
+</body>
+
+</html>

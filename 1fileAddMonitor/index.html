@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>升级详情</title>
+    <style>
+
+        body {
+            margin: 0;
+            background:rgb(247, 247, 247);
+            padding: 0;
+            font: 12px normal Verdana, Arial, Helvetica, sans-serif;
+            height: 100%;
+            color: #fff;
+        }
+
+     
+        .bg {
+            background: rgb(247, 247, 247);;
+            color: #fff;
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 0 auto;
+            height: 90vh;
+            overflow: auto;
+        }
+
+        .progress {
+            text-align: right;
+            background: rgb(247, 247, 247);;
+            height: 1.5rem;
+            border-radius: 3px;
+            border-left: 1px solid #111;
+            border-top: 1px solid #111;
+            border-right: 1px solid #333;
+            border-bottom: 1px solid #333;
+            width: 80%;
+            margin: 0 auto;
+            line-height: 1.5rem;
+            border: 1px solid #ccc;
+        }
+
+        .content {
+            height: 1.3rem;
+            margin: 2px 0;
+            background: #2187e7;
+            position: absolute;
+            box-shadow: 0px 0px 10px 1px rgba(0, 198, 255, 0.4);
+        }
+
+        .active {
+            visibility: visible;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg">
+       
+    </div>
+    <div class="progress">
+        <div class="content">
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // let nowurl = window.location.hostname
+        let nowurl = '127.0.0.1'
+        /*=============================页面元素==============================*/
+        //进度条
+        let progress = function (i) {
+            var content = document.getElementsByClassName('content');
+            content = content[0];
+            if (i < 100) {
+                content.style.width = (i * 0.8) + '%';
+                content.innerHTML = parseInt(i) + '%';
+            } else {
+                content.style.backgroundColor = 'green';
+                content.innerHTML = '升级完成';
+                content.style.width = '80%';
+                setTimeout(() => {
+                    location.replace('http://' + nowurl + '/#/login')
+                }, 2000)
+            }
+        }
+        //详细信息窗口
+        let boxInsert = function (data) {
+            //插入数据
+     
+        }
+        /*=============================版本升级相关=======================*/
+        var isUp = false;
+        let upToNum = function (i, num) {
+            if (!isUp) return
+            i++
+            progress(i)
+            if (i < num) {
+                setTimeout(() => {
+                    upToNum(i, num)
+                }, 1000)
+            }
+        }
+        let bdp = function () {
+            let i = 0;
+            var socket = io.connect('ws://' + nowurl + ':3030');
+            //连接成功时触发
+            socket.on('connect', function () {
+                console.log('连接成功');
+            });
+            //连接断开时触发
+            socket.on('disconnect', function () {
+                console.log('连接断开');
+            });
+            //收到消息时触发
+            socket.on('message', function (data) {
+                if (data != "") {
+                    boxInsert(data)
+                }
+            });
+            //socket返回进度条
+            socket.on('progress', function (val) {
+                if (val > i) {
+                    isUp = false;
+                    setTimeout(() => {
+                        isUp = true;
+                        upToNum(i, val)
+                        i = val
+                    }, 1000)
+
+
+
+                }
+            });
+        }
+        /*=============================UI升级相关=======================*/
+        let ui = function () {
+            let i = 0
+            let upTo99 = function () {
+                i++
+                console.log(i)
+                progress(i)
+                if (i < 99) {
+                    setTimeout(() => {
+                        upTo99()
+                    }, 1000)
+                }
+            }
+            upTo99()
+            //验证ui升级是否完成
+            setTimeout(() => {
+                i = 100;
+                progress(100)
+            }, 60000)
+        }
+        /*============================初始化============================*/
+        ui()
+    </script>
+</body>
+
+</html>

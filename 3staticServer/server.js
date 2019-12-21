@@ -32,7 +32,7 @@ app.use(function(req, res,next) {
 });
 
 // 设置静态目录
-app.use(express.static(path.join(__dirname, 'static')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 app.use('/', function(req, res) {  
       const url = req.url; 
