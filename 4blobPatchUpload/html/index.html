@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset=" utf-8">
+<title>readAsArrayBuffer测试</title>
+</head>
+<body>
+<input type="file" id="file"/>
+<script>
+  window.onload = function () {
+    var input = document.getElementById("file");
+    input.onchange = function () {
+      var file = this.files[0];
+      if (file) {
+        //读取本地文件，以gbk编码方式输出
+        var reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onload = function () {
+          console.log(this.result);
+          console.log(new Blob([this.result]))
+        }
+      }
+    }
+  }
+</script>
+</body>
+</html>

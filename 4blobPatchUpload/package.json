@@ -1,0 +1,15 @@
+{
+  "name": "blob_patch_upload",
+  "version": "1.0.0",
+  "description": "通过blob实现分片上传、断点续传一级秒传",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
