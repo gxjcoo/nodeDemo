@@ -1,27 +1,77 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
+
 <head>
-<meta charset=" utf-8">
-<title>readAsArrayBuffer测试</title>
+  <meta charset=" utf-8">
+  <title>readAsArrayBuffer测试</title>
 </head>
+
 <body>
-<input type="file" id="file"/>
-<script>
-  window.onload = function () {
-    var input = document.getElementById("file");
-    input.onchange = function () {
-      var file = this.files[0];
-      if (file) {
-        //读取本地文件，以gbk编码方式输出
-        var reader = new FileReader();
-        reader.readAsArrayBuffer(file);
-        reader.onload = function () {
-          console.log(this.result);
-          console.log(new Blob([this.result]))
+  上传
+  <input type="file" id="file" />
+  <p></p>
+  <button id="down">下载</button>
+  <script>
+    window.onload = function () {
+      //上传
+      var input = document.getElementById("file");
+      input.onchange = function () {
+        var file = this.files[0];
+        if (file) {
+          //获取上传文件
+          var reader = new FileReader();
+          reader.readAsArrayBuffer(file);
+          reader.onload = function () {
+            //转换为blob
+            var fileStream = new Blob([this.result])
+          
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST",
+              "http://127.0.0.1:8080/upLoad",
+              true);
+            xmlHttp.send(fileStream);
+            xmlHttp.onreadystatechange = function () {
+              if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                console.log(xmlHttp.responseText)
+              }
+            }
+          }
         }
       }
+
+
+      //下载
+      var down = document.getElementById("down");
+      down.addEventListener('click',function(){
+        xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("get",
+              "http://127.0.0.1:8080/downLoad",
+              true);
+            xmlHttp.send(null);
+            xmlHttp.onreadystatechange = function () {
+              
+              if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                console.log(xmlHttp.response)
+                var blob = new Blob([xmlHttp.response],{type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})
+                console.log(blob)
+            var downloadElement = document.createElement('a')
+            var href = window.URL.createObjectURL(blob)
+            downloadElement.href = href
+            downloadElement.download = 'test.xls'
+            document.body.appendChild(downloadElement)
+            downloadElement.click()
+            document.body.removeChild(downloadElement)
+            window.URL.revokeObjectURL(href)
+              }
+            }
+      })
     }
-  }
-</script>
+
+
+
+
+
+  </script>
 </body>
+
 </html>
